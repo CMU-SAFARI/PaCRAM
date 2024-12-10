@@ -1,0 +1,16 @@
+build/
+.vscode
+__pycache__/
+ext/
+ramulator2
+_deps/
+CMakeCache.txt
+CMakeFiles/
+*/CMakeFiles/
+*.cmake
+Makefile
+compile_commands.json
+cputraces/*
+libramulator.so
+Makefile
+checkpoints

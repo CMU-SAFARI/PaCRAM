@@ -1,0 +1,44 @@
+Frontend:
+  impl: BHO3
+  clock_ratio: 8
+  llc_capacity_per_core: 2MB
+  llc_num_mshr_per_core: 16
+  num_expected_insts: 10000000
+  num_max_cycles: 50000000
+  llc_serialize: true
+  llc_serialization_filename: ./test.llc
+  inst_window_depth: 128
+  traces: 
+    - ./test.trace
+
+  Translation:
+    impl: RandomTranslation
+    max_addr: 17179869184
+
+MemorySystem:
+  impl: BHDRAMSystem
+  clock_ratio: 3
+
+  DRAM:
+    impl: DDR5-RVRR
+    drampower_enable: false
+    org:
+      preset: DDR5_16Gb_x8
+      channel: 1
+      rank: 2
+    timing:
+      preset: DDR5_3200AN 
+
+
+  BHDRAMController:
+    impl: BHDRAMController
+    BHScheduler:
+      impl: BHScheduler
+    RefreshManager:
+      impl: AllBank
+    RowPolicy:
+      impl: ClosedRowPolicy
+      cap: 4
+
+  AddrMapper:
+    impl: RoBaRaCoCh_with_rit

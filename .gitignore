@@ -1,0 +1,6 @@
+DB_results
+DB_plots
+Ram_results
+Ram_plots
+*.tar.gz
+__pycache__
