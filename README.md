@@ -9,10 +9,10 @@ PaCRAM is a technique that reduces the performance overhead of RowHammer mitigat
 +-- Ram_scripts/                          # Scripts to parse and plot Ramulator2 results
 │   +-- ramulator_pacram/src              # Ramulator2 source code
 │   │   +-- dram/impl
-│   │   │   +-- DDR5-RVRR.cpp     # DDR5 implementation that supports partial charge restoration
+│   │   │   +-- DDR5-RVRR.cpp             # DDR5 implementation that supports partial charge restoration
 │   │   +-- dram_controller
 │   │   │   +-- impl/plugin
-│   │   │   │   │   +-- pacram.h      # Ramulator2 plugin that implements PaCRAM
+│   │   │   │   │   +-- pacram.h          # Ramulator2 plugin that implements PaCRAM
 │   │   ...
 ...
 +-- README.md                             # This file                        
