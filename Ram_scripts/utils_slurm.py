@@ -6,7 +6,7 @@ AE_SLURM_PART_NAME="cpu_part"
 SLURM_USERNAME = "$USER" 
 
 # Maximum Slurm jobs
-MAX_SLURM_JOBS = 100 
+MAX_SLURM_JOBS = 500 
 
 # Delay between retrying Slurm job submission (when job limit is reached)
 SLURM_RETRY_DELAY = 5 
