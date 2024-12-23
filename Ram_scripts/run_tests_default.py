@@ -1,5 +1,6 @@
 import os, yaml, copy, time, sys
 from utils_runs import *
+from utils_slurm import *
 from calc_rh_parameters import *
 
 is_slurm = (sys.argv[1] == "slurm")
@@ -61,16 +62,20 @@ for trace_name in SINGLECORE_TRACES:
                 config["MemorySystem"]["BHDRAMController"]["plugins"].append({"ControllerPlugin" : {"impl": "PRAC", "abo_threshold": abo_threshold, "abo_delay_acts": 4, "abo_recovery_refs": 4}})
 
             if is_slurm:
-                cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+                cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
             else:
                 cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"
 
             yaml.dump(config, config_file, default_flow_style=False)
             config_file.close()
+            if is_slurm:
+                while check_running_jobs() >= MAX_SLURM_JOBS:
+                    print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+                    time.sleep(SLURM_RETRY_DELAY)
             print("Running: trace = " + trace_name + ", mitigation = " + mitigation + ", tRH = " + str(tRH))
             os.system(cmd)
 
-            time.sleep(0.03)
+            time.sleep(0.1)
 
 ### Multicore runs
 for trace_name, trace_mix in MULTICORE_TRACES.items():
@@ -117,15 +122,19 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
                 config["MemorySystem"]["BHDRAMController"]["plugins"].append({"ControllerPlugin" : {"impl": "PRAC", "abo_threshold": abo_threshold, "abo_delay_acts": 4, "abo_recovery_refs": 4}})
             
             if is_slurm:
-                cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+                cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
             else:
                 cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"
 
             yaml.dump(config, config_file, default_flow_style=False)
             config_file.close()
+            if is_slurm:
+                while check_running_jobs() >= MAX_SLURM_JOBS:
+                    print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+                    time.sleep(SLURM_RETRY_DELAY)
             print("Running: trace = " + trace_name + ", mitigation = " + mitigation + ", tRH = " + str(tRH))
             os.system(cmd)
 
-            time.sleep(0.03)
+            time.sleep(0.1)
 
 print("[INFO] All default mitigation runs are started.")

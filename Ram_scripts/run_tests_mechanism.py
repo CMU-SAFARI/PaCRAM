@@ -2,6 +2,7 @@ import os, yaml, copy, time, sys
 import pandas as pd
 from calc_rh_parameters import *
 from utils_runs import *
+from utils_slurm import *
 from math import log2
 
 is_slurm = (sys.argv[1] == "slurm")
@@ -93,18 +94,21 @@ for mfr in MFR_DICT.keys():
                         config["MemorySystem"]["BHDRAMController"]["plugins"].append({"ControllerPlugin" : {"impl": "PRAC", "abo_threshold": abo_threshold, "abo_delay_acts": 4, "abo_recovery_refs": 4, 'pacram': True, 'pacram_set_period_ns': pacram_set_period_ns}})
         
                     if is_slurm:
-                        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+                        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
                     else:
                         cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"  
                     
                     yaml.dump(config, config_file, default_flow_style=False)
                     config_file.close()
+                    
+                    if is_slurm:
+                        while check_running_jobs() >= MAX_SLURM_JOBS:
+                            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+                            time.sleep(SLURM_RETRY_DELAY)
                     print("Running: mfr = " + mfr + ", trace = " + trace_name + ", mitigation = " + mitigation + ", tRH = " + str(base_tRH) + ", latency_factor = " + str(latency_factor))
                     os.system(cmd)
 
-                    time.sleep(0.03)
-
-
+                    time.sleep(0.1)
 
 ### Multicore runs
 for mfr in MFR_DICT.keys():
@@ -179,15 +183,20 @@ for mfr in MFR_DICT.keys():
                         config["MemorySystem"]["BHDRAMController"]["plugins"].append({"ControllerPlugin" : {"impl": "PRAC", "abo_threshold": abo_threshold, "abo_delay_acts": 4, "abo_recovery_refs": 4, 'pacram': True, 'pacram_set_period_ns': pacram_set_period_ns}})
         
                     if is_slurm:
-                        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+                        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
                     else:
                         cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"  
                     
                     yaml.dump(config, config_file, default_flow_style=False)
                     config_file.close()
+                    
+                    if is_slurm:
+                        while check_running_jobs() >= MAX_SLURM_JOBS:
+                            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+                            time.sleep(SLURM_RETRY_DELAY)
                     print("Running: mfr = " + mfr + ", trace = " + trace_name + ", mitigation = " + mitigation + ", tRH = " + str(base_tRH) + ", latency_factor = " + str(latency_factor))
                     os.system(cmd)
 
-                    time.sleep(0.03)
+                    time.sleep(0.1)
 
 print("[INFO] All PaCRAM runs are started.")

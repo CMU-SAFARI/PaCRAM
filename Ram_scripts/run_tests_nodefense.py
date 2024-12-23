@@ -1,5 +1,6 @@
 import os, yaml, copy, time, sys
 from utils_runs import *
+from utils_slurm import *
 
 is_slurm = (sys.argv[1] == "slurm")
 
@@ -40,7 +41,7 @@ for trace in SINGLECORE_TRACES:
     config['MemorySystem']['BHDRAMController']['plugins'][0]['ControllerPlugin']['path'] = cmd_count_filename
 
     if is_slurm:
-        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
     else:
         cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"  
 
@@ -49,6 +50,10 @@ for trace in SINGLECORE_TRACES:
     result_file.write(cmd + "\n")
     result_file.close()
     
+    if is_slurm:
+        while check_running_jobs() >= MAX_SLURM_JOBS:
+            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+            time.sleep(SLURM_RETRY_DELAY)
     print("Running: trace = " + trace + ", mitigation = nodefense")
     os.system(cmd)
 
@@ -80,15 +85,19 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
     config['MemorySystem']['BHDRAMController']['plugins'][0]['ControllerPlugin']['path'] = cmd_count_filename
 
     if is_slurm:
-        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
+        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1 &"
     else:
-        cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"
-            
+        cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {result_filename} 2>&1"  
+
     yaml.dump(config, config_file, default_flow_style=False)
     config_file.close()
     result_file.write(cmd + "\n")
     result_file.close()
     
+    if is_slurm:
+        while check_running_jobs() >= MAX_SLURM_JOBS:
+            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+            time.sleep(SLURM_RETRY_DELAY)
     print("Running: trace = " + trace_name + ", mitigation = nodefense")
     os.system(cmd)
 

@@ -1,5 +1,6 @@
 import os, yaml, copy, time, sys
 from utils_runs import *
+from utils_slurm import *
 
 is_slurm = (sys.argv[1] == "slurm")
 
@@ -37,13 +38,17 @@ for trace in SINGLECORE_TRACES:
     config['Frontend']['llc_serialize'] = True
 
     if is_slurm:
-        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1 &"
+        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1 &"
     else:
         cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1"
 
     yaml.dump(config, config_file, default_flow_style=False)
     config_file.close()
     
+    if is_slurm:
+        while check_running_jobs() >= MAX_SLURM_JOBS:
+            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+            time.sleep(SLURM_RETRY_DELAY)
     print("Running: checkpoint for trace = " + trace)
     os.system(cmd)
 
@@ -71,13 +76,17 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
     config['Frontend']['llc_serialize'] = True
 
     if is_slurm:
-        cmd = f"srun {RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1 &"
+        cmd = f"{SLURM_CMD} {RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1 &"
     else:
         cmd = f"{RAM_SRC}/ramulator2 -c '{config}' > {log_filename} 2>&1"
-    
+
     yaml.dump(config, config_file, default_flow_style=False)
     config_file.close()
     
+    if is_slurm:
+        while check_running_jobs() >= MAX_SLURM_JOBS:
+            print(f"[INFO] Maximum Slurm Job limit ({MAX_SLURM_JOBS}) reached. Retrying in {SLURM_RETRY_DELAY} seconds")
+            time.sleep(SLURM_RETRY_DELAY)
     print("Running: checkpoint for trace = " + trace_name)
     os.system(cmd)
 

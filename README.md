@@ -40,13 +40,19 @@ PaCRAM is a technique that reduces the performance overhead of RowHammer mitigat
 5. Generate figures with `./plot_ram_figures.sh`
 
 ## Simulation Configuration Parameters
-Execution of Ramulator2 simulations can be configured with the following configuration parameters. These parameters reside in `Ram_scripts/utils_runs.py` unless the parameter description below states a different path.
+Execution of Ramulator2 simulations can be configured with the following configuration parameters. These parameters reside in `Ram_scripts/utils_runs.py`.
 
 `MITIGATION_LIST`: The list of tested RowHammer mitigations
 
 `NRH_VALUES`: The list of tested RowHammer threshold values
 
 `MFR_DICT`: The dictionary of charge restoration amounts for different manufacturers
+
+While using Slurm with a cluster, Slurm parameters can be configured with the following parameters. These parameters reside in `Ram_scripts/utils_slurm.py`.
+
+`MAX_SLURM_JOBS`: The maximum number of runs that the cluster can run simultaneously
+
+`SLURM_RETRY_DELAY`: The delay between retrying Slurm job submission when job limit is reached
 
 ## Contacts:
 Yahya Can Tuğrul (yahyacantugrul [at] gmail [dot] com)  

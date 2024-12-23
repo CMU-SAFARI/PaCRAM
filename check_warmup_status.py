@@ -29,8 +29,8 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
 
 not_found = num_exp - num_finished - num_failed - num_running
 if num_exp == num_finished:
-    print("[INFO] All warmup runs are finished.")
+    print("[INFO-warmup] All warmup runs are finished.")
 elif num_failed > 0:
-    print("[INFO] There are failed runs. Please rerun './prepare_warmups.sh'")
+    print("[INFO-warmup] There are failed runs. Please rerun './prepare_warmups.sh'")
 else:
-    print(f"[INFO] {num_running} runs are running. {not_found} runs are not found.")
+    print(f"[INFO-warmup] {num_running} runs are running. {not_found} runs are not found.")

@@ -31,11 +31,11 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
 
 not_found = num_exp - num_finished - num_failed - num_running
 if num_exp == num_finished:
-    print("[INFO] All nodefense runs are finished.")
+    print("[INFO-nodefense] All nodefense runs are finished.")
 elif num_failed > 0:
-    print("[INFO] There are failed runs. Please rerun './run_ramulator_all.sh'")
+    print("[INFO-nodefense] There are failed runs. Please rerun './run_ramulator_all.sh'")
 else:
-    print(f"[INFO] {num_running} runs are running. {not_found} runs are not found.")
+    print(f"[INFO-nodefense] {num_running} runs are running. {not_found} runs are not found.")
 
 
 num_exp = (len(SINGLECORE_TRACES) + len(MULTICORE_TRACES)) * len(MITIGATION_LIST) * len(NRH_VALUES)
@@ -68,11 +68,11 @@ for trace_name, trace_mix in MULTICORE_TRACES.items():
 
 not_found = num_exp - num_finished - num_failed - num_running
 if num_exp == num_finished:
-    print("[INFO] All default runs are finished.")
+    print("[INFO-default] All default runs are finished.")
 elif num_failed > 0:
-    print("[INFO] There are failed runs. Please rerun './run_ramulator_all.sh'")
+    print("[INFO-default] There are failed runs. Please rerun './run_ramulator_all.sh'")
 else:
-    print(f"[INFO] {num_running} runs are running. {not_found} runs are not found.")
+    print(f"[INFO-default] {num_running} runs are running. {not_found} runs are not found.")
 
 num_exp = (len(SINGLECORE_TRACES) + len(MULTICORE_TRACES)) * len(MITIGATION_LIST) * len(NRH_VALUES) * sum(len(values) for values in MFR_DICT.values())
 num_finished = 0
@@ -120,9 +120,9 @@ for mfr in MFR_DICT.keys():
 
 not_found = num_exp - num_finished - num_failed - num_running
 if num_exp == num_finished:
-    print("[INFO] All mechanism runs are finished.")
+    print("[INFO-mechanism] All mechanism runs are finished.")
 elif num_failed > 0:
-    print("[INFO] There are failed runs. Please rerun './run_ramulator_all.sh'")
+    print("[INFO-mechanism] There are failed runs. Please rerun './run_ramulator_all.sh'")
 else:
-    print(f"[INFO] {num_running} runs are running. {not_found} runs are not found.")
+    print(f"[INFO-mechanism] {num_running} runs are running. {not_found} runs are not found.")
     
