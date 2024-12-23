@@ -31,7 +31,7 @@ PaCRAM is a technique that reduces the performance overhead of RowHammer mitigat
 
 
 ## Example Use
-1. Parse and plot DRAM Bender results `./plot_db_figures.sh`
+1. Parse and plot DRAM Bender results `./plot_db_figures.sh` or `plot_db_figures_slurm.sh`.
 2. Prepare Ramulator2 warmup checkpoints `./prepare_warmups.sh` or `./prepare_warmups_slurm.sh`.
 3. Wait for the warmup runs to finish. You can use `python3 check_warmup_status.py` to track warmup status. If it reports any failed or not found runs, you can rerun step 2. 
 2. Run Ramulator2 simulations `./run_ramulator_all.sh` or `./run_ramulator_all_slurm.sh`.
