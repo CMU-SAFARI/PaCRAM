@@ -1,92 +1,85 @@
 import os
 import pandas as pd
-from pandas.core.common import SettingWithCopyWarning
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 import warnings
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=UserWarning)
-warnings.simplefilter(action='ignore', category=SettingWithCopyWarning)
 
 PWD = os.getcwd()
 CSV_DIR = f"{PWD}/../Ram_results/processed/"
 PLOT_DIR = f"{PWD}/../Ram_plots/"
 if not os.path.exists(PLOT_DIR):
     os.makedirs(PLOT_DIR)
-
-num_mechs = 5
-num_mixtypes= 2
-fig, axarr = plt.subplots(num_mixtypes, num_mechs, figsize=(8, 2.1))
-colors = sns.color_palette("plasma", 3)
+    
+fig_width = 4
+fig_height = fig_width * 0.37
+colors = sns.color_palette("tab10", 5)
+fig, axarr = plt.subplots(1, 2, figsize=(fig_width, fig_height))
 
 for i, core in enumerate(["single", "multi"]):
     df = pd.read_csv(f"{CSV_DIR}{core}core_pacram_best.csv")
-    df.drop(columns=set(df.columns) - set(['trace', 'mitigation', 'nRH', 'config', 'pref_cycles']), inplace=True)
 
-    base_df = df[~((df.config.str.contains("Mfr. S") | df.config.str.contains("Mfr. H")))]
-    base_df = base_df[base_df['nRH'] == 1024]
-    df = pd.merge(df, base_df, on=["trace", "mitigation"], how="left", suffixes=("", "_base"))
-    df.drop(columns=['config_base', 'nRH_base'], inplace=True)
     if core == "single":
-        df[((df.config == "PaCRAM-S") & ((df.mitigation == "Hydra") | (df.mitigation == "Graphene")))]["pref_cycles"] = df[((df.config == "PaCRAM-S") & ((df.mitigation == "Hydra") | (df.mitigation == "Graphene")))]["pref_cycles_base"]
+        df = df[~((df["config"] == "PaCRAM-S") & ((df["mitigation"] == "Graphene") | (df["mitigation"] == "Hydra")))]
+        df.rename(columns={"n_ipc_over_nodefense": "norm_ipc"}, inplace=True)
     else:
-        df[((df.config == "PaCRAM-S") & ((df.mitigation == "Hydra") | (df.mitigation == "PARA") | (df.mitigation == "Graphene")))]["pref_cycles"] = df[((df.config == "PaCRAM-S") & ((df.mitigation == "Hydra") | (df.mitigation == "Graphene") | (df.mitigation == "PARA")))]["pref_cycles_base"]
-    df['norm_pref'] = df['pref_cycles'] / df['pref_cycles_base']
-    df = df[~df['norm_pref'].isna()]
-    df = df[~df['norm_pref'].isin([np.inf, -np.inf])]
+        df = df[~((df["config"] == "PaCRAM-S") & ((df["mitigation"] == "Graphene") | (df["mitigation"] == "Hydra") | (df["mitigation"] == "PARA")))]
+        df.rename(columns={"n_weighted_speedup_over_nodefense": "norm_ipc"}, inplace=True)
+    # df = df.groupby(["mitigation", "nRH", "config"]).mean().reset_index()
+    # df['mitigation'] = pd.Categorical(df['mitigation'], ["PARA", "RFM", "PRAC", "Hydra", "Graphene"])
+    # df.sort_values("mitigation", inplace=True)
 
-    df['mitigation'] = pd.Categorical(df['mitigation'], ["PARA", "RFM", "PRAC", "Hydra", "Graphene"])
-    df.sort_values("mitigation", inplace=True)
+    ax = axarr[i]
+    sns.lineplot(data=df, x="nRH", y="norm_ipc", hue="mitigation", style="config", ax=ax, markers=False, 
+                    palette=colors, linewidth=1, alpha=1, err_style="band", errorbar=("ci", 100),
+                    hue_order=["PARA", "RFM", "PRAC", "Hydra", "Graphene"],
+                    style_order=["Default", "PaCRAM-H", "PaCRAM-S"])
 
-    for mech_id, (mech, mech_df) in enumerate(df.groupby("mitigation")):
-        plot_df = mech_df
-        vrr_id = 0
-        ax = axarr[i][mech_id]
-        sns.boxplot(data=plot_df, x="nRH", y="norm_pref", hue='config', ax=ax, palette=colors, 
-                    whis=[0, 90], showfliers=False, 
-                    hue_order=["PaCRAM-S", "PaCRAM-H", "Default"], linewidth=0.5)
+    ax.invert_xaxis()
+    ax.set_xscale('log', base=2)
+    ax.set_xticks([1024, 512, 256, 128, 64, 32])
+    xticklabels = []
+    for x in [1024, 512, 256, 128, 64, 32]:
+        xticklabels += [str(int(x/1024))+"K" if x >= 1024 else str(int(x))]
+    ax.set_xticklabels(xticklabels, rotation=90, fontsize=8.5)
+            
+    ax.grid(which="major", axis="y", color="black", alpha=0.5, linestyle="dotted", linewidth=0.5, zorder=0)
+    ax.grid(which="minor", axis="y", color="gray", alpha=0.2, linestyle="dotted", linewidth=0.5, zorder=0)
+    ax.axhline(y=1, color="black", linestyle="dashed", linewidth=1, zorder=0)
 
-        ax.invert_xaxis()
+    handles, labels = ax.get_legend_handles_labels()
+    labels[-3:] = ["No PaCRAM", "PaCRAM-H", "PaCRAM-S"]
+    handles = handles[1:6] + handles[-3:]
+    labels = labels[1:6] + labels[-3:]
+    for a in range(8):
+        handles[a].set_linewidth(1.5)
+        
+    ax.legend().remove()
+    ax.set_ylabel("")
+    ax.set_xlabel("")
+    ax.set_title("")
 
-        ax.set_yscale('log', base=10)
+    ax.set_ylim(0.29, 1.0+0.01*0.7/0.4)
+    ax.set_yticks([0.4, 0.6, 0.8, 1])
+    if i == 0:
+        ax.set_yticklabels(["0.4", "0.6", "0.8", "1.0"], fontsize=8.5)         
+    else:
+        ax.set_yticklabels(["", "", "", ""], fontsize=8.5)         
+    ax.xaxis.set_tick_params(pad=0, length=2)
+    ax.yaxis.set_tick_params(pad=0, length=2)
+    test_type = "Single-core" if i == 0 else "Multi-core"
+    ax.text(0.03, 0.03, test_type, horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes, 
+            fontsize=8.5, bbox=dict(facecolor='white', alpha=0.5, boxstyle='round,pad=0.1'))
+    if i == 0:
+        ax.set_ylabel("System performance\n(normalized to no\nRowHammer mitigation)", fontsize=9, x=0, y=0.38, labelpad=2)
 
-        ax.grid(which="major", axis="y", color="black", alpha=0.5, linestyle="dotted", linewidth=0.5, zorder=0)
-        ax.grid(which="minor", axis="y", color="gray", alpha=0.2, linestyle="dotted", linewidth=0.5, zorder=0)
-        ax.axhline(y=1, color="black", linestyle="dashed", linewidth=1, zorder=0)
+fig.legend(handles, labels, loc="center left", ncols=1, fancybox=True, fontsize=8.5,
+            borderpad=0.2, labelspacing=0.2, bbox_to_anchor=(0.9, 0.5), 
+            columnspacing=0.5, handletextpad=0.3, handlelength=1.5)
 
-        handles, labels = ax.get_legend_handles_labels()
-        handles = handles[::-1]
-        labels = labels[::-1]
-        ax.legend(handles, labels, loc="upper left", ncols=1, fancybox=True, fontsize=5.8,
-                    borderpad=0.2, labelspacing=0.2,  
-                    columnspacing=0.5, handletextpad=0.3, handlelength=1,  bbox_transform=ax.transAxes)
-
-        ax.set_ylabel("")
-        ax.set_xlabel("")
-        ax.set_title("")
-
-        if i == 1:
-            ax.set_xticklabels(["32", "64", "128", "256", "512", "1K"], rotation=90, fontsize=6.5)
-        else:
-            ax.set_xticklabels([])
-
-        if i == 0:
-            ax.set_title(mech, fontsize=7.5, pad=2)
-        if mech_id == 0 or mech_id == 1:
-            ax.set_ylim(0, 200)
-            ax.set_yticks([1, 10, 100])
-            ax.set_yticklabels(["1", "10", "100"], fontsize=6.5)
-        else:
-            ax.set_ylim(0, 80000)
-            ax.set_yticks([1, 10, 100, 1000, 10000])
-            ax.set_yticklabels(["1", "10", "100", "1K", "10K"], fontsize=6.5)
-        ax.xaxis.set_tick_params(pad=0, length=2)
-        ax.yaxis.set_tick_params(pad=0, length=2)
-plt.subplots_adjust(hspace=0.04, wspace=0.24)
-fig.supylabel('Time Spent on Preventive Refreshes\n(Norm. to RH Defenses at $N_{RH}=1K$)\n(Top: Singlecore, Bottom: Multicore)', 
-                fontsize=6.5, va='center', ha='center', x=0.08, y=0.47)
-fig.supxlabel('RowHammer Threshold ($N_{RH}$)', fontsize=7.5, x=0.5, y=-0.07)
-fig.savefig(PLOT_DIR + "fig17_pref_time.png", bbox_inches='tight')
-fig.savefig(PLOT_DIR + "fig17_pref_time.pdf", bbox_inches='tight')
+plt.subplots_adjust(hspace=0.04, wspace=0.05)
+fig.supxlabel('RowHammer threshold ($N_{RH}$)', fontsize=9, x=0.5, y=-0.18)
+fig.savefig(PLOT_DIR + "fig17_perf_imp.png", bbox_inches='tight', pad_inches=0.01)
+fig.savefig(PLOT_DIR + "fig17_perf_imp.pdf", bbox_inches='tight', pad_inches=0.01)
