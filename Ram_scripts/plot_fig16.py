@@ -24,7 +24,7 @@ sc_df.rename(columns={"n_ipc_over_default": "norm_ipc"}, inplace=True)
 
 sc_df['latency_reduction'] = sc_df['config'].apply(lambda x: float(x.split("_")[2]))
 sc_df['config'] = sc_df['config'].apply(lambda x: x.split("_")[1])
-sc_df['config'] = sc_df['config'].apply(lambda x: "PaCRAM-S" if "Mfr. S" in x else "PaCRAM-H")
+sc_df['config'] = sc_df['config'].apply(lambda x: "PaCRAM-" + x[-1])
 
 for config in sc_df.config.unique():
     for nRH in sc_df.nRH.unique():
@@ -32,16 +32,13 @@ for config in sc_df.config.unique():
                 for trace in sc_df.trace.unique():
                     sc_df = sc_df.append({'config': config, 'nRH': nRH, 'mitigation': mech, 'trace': trace, 'norm_ipc': 1.0, 'latency_reduction': 1.0}, ignore_index=True)
 
-num_mechs = sc_df.mitigation.unique().shape[0]
-num_modules = sc_df.config.unique().shape[0]
-
 sc_df['mitigation'] = pd.Categorical(sc_df['mitigation'], ["PARA", "RFM", "PRAC", "Hydra", "Graphene"])
 sc_df.sort_values("mitigation", inplace=True)
 
 
 num_mechs = sc_df.mitigation.unique().shape[0]
 num_modules = sc_df.config.unique().shape[0]
-fig, axarr = plt.subplots(num_modules, num_mechs, figsize=(8, 2.1))
+fig, axarr = plt.subplots(num_modules, num_mechs, figsize=(9, 3.4))
 colors = sns.color_palette("plasma", 6)
 
 for c_id, (config, configdf) in enumerate(sc_df.groupby("config")):
@@ -53,9 +50,10 @@ for c_id, (config, configdf) in enumerate(sc_df.groupby("config")):
                     err_style="band", errorbar=("ci", 100))
 
         ax.invert_xaxis()
+        ax.set_xlim(1.02, 0.15)
         ax.set_xticks([0.25, 0.50, 0.75, 1.0])
-        if c_id == 1:
-            ax.set_xticklabels(ax.get_xticklabels(), fontsize=6.5, rotation=90)            
+        if c_id == 2:
+            ax.set_xticklabels(ax.get_xticklabels(), fontsize=6.5)            
         else:
             ax.set_xticklabels(["", "", "", ""], fontsize=6.5)            
         ax.grid(which="major", axis="y", color="black", alpha=0.5, linestyle="dotted", linewidth=0.5, zorder=0)
@@ -65,49 +63,60 @@ for c_id, (config, configdf) in enumerate(sc_df.groupby("config")):
         labels = ["32", "64", "128", "256", "512", "1K"]
 
         if c_id == 0:
-            ax.axvline(x=0.36, color="red", linestyle="dashed", linewidth=1, zorder=0)
-        else:
+            ax.axvline(x=0.36, color="red", linestyle="dashed", linewidth=1, zorder=10)
+        elif c_id == 1:
+            ax.axvline(x=0.18, color="red", linestyle="dashed", linewidth=1, zorder=10)
+        elif c_id == 2:
             if m_id == 0 or m_id == 1 or m_id == 2:
-                ax.axvline(x=0.45, color="red", linestyle="dashed", linewidth=1, zorder=0)
+                ax.axvline(x=0.45, color="red", linestyle="dashed", linewidth=1, zorder=10)
             else:
-                ax.axvline(x=1, color="red", linestyle="dashed", linewidth=1, zorder=0)
+                ax.axvline(x=1, color="red", linestyle="dashed", linewidth=1, zorder=10)
 
         ax.set_ylabel("")
         ax.set_xlabel("")
         ax.set_title("")
 
-        if c_id == 0:
-            ax.set_title(mech, fontsize=7.5, pad=2)
-
         if mfr == "Mfr. H":
-            ax.text(0.03, 0.97, "PaCRAM-H", horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, 
-                fontsize=7.5, bbox=dict(facecolor='white', alpha=0.5, boxstyle='round,pad=0.1'))
+            ax.text(0.03, 0.97, "PaCRAM-H + " + mech, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, 
+                fontsize=7, bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.1'), zorder=11)
             
         if mfr == "Mfr. S":
-            ax.text(0.03, 0.97, "PaCRAM-S", horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, 
-                fontsize=7.5, bbox=dict(facecolor='white', alpha=0.5, boxstyle='round,pad=0.1'))
+            ax.text(0.03, 0.97, "PaCRAM-S + " + mech, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, 
+                fontsize=7, bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.1'), zorder=11)
+
+        if mfr == "Mfr. M":
+            ax.text(0.03, 0.97, "PaCRAM-M + " + mech, horizontalalignment='left', verticalalignment='top', transform=ax.transAxes, 
+                fontsize=7, bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.1'), zorder=11)
             
         ax.set_axisbelow(True)
         ax.grid(color='gray', linestyle='dashed')
 
-        if m_id == 0 or m_id == 1:
-            ax.set_ylim(0.75, 1.25)
+        if m_id == 0:
+            ax.set_ylim(0.55, 1.45)
+            ax.set_yticks([0.6, 0.8, 1.0, 1.2, 1.4])
+            ax.set_yticklabels([0.6, 0.8, 1.0, 1.2, 1.4], fontsize=6.5)            
+        elif m_id == 1:
+            ax.set_ylim(0.77, 1.23)
             ax.set_yticks([0.8, 0.9, 1.0, 1.1, 1.2])
             ax.set_yticklabels([0.8, 0.9, 1.0, 1.1, 1.2], fontsize=6.5)            
-        else:
+        elif m_id == 2 or m_id == 3:
             ax.set_ylim(0.93, 1.07)
             ax.set_yticks([0.95, 1.0, 1.05])
             ax.set_yticklabels([0.95, "1.00", 1.05], fontsize=6.5)
+        elif m_id == 4:
+            ax.set_ylim(0.88, 1.12)
+            ax.set_yticks([0.90, 0.95, 1.0, 1.05, 1.10])
+            ax.set_yticklabels(["0.90", 0.95, "1.00", 1.05, "1.10"], fontsize=6.5)
         ax.xaxis.set_tick_params(pad=0, length=2)
         ax.yaxis.set_tick_params(pad=0, length=2)
         ax.legend(handles, labels, loc="lower left", ncols=2, fancybox=True, fontsize=5.8,
                     borderpad=0.2, labelspacing=0.2,  
                     columnspacing=0.5, handletextpad=0.3, handlelength=1,  bbox_transform=ax.transAxes)
 
-plt.subplots_adjust(hspace=0.04, wspace=0.24)
+plt.subplots_adjust(hspace=0.04, wspace=0.22)
 fig.supylabel('Instruction-per-cycle (IPC)\n(normalized to baseline IPC @ $t_{RAS(Nom)}$)', 
-                fontsize=7.5, va="center", ha="center", x=0.08, y=0.42)
+                fontsize=7.5, va="center", ha="center", x=0.09, y=0.5)
 fig.supxlabel('Charge restoration latency ($t_{RAS(Red)}$), normalized to the nominal charge restoration latency ($t_{RAS(Nom)}$)', 
-                fontsize=7.5, x=0.5, y=-0.08)
+                fontsize=7.5, x=0.5, y=0.02)
 fig.savefig(PLOT_DIR + "fig16_latency_reduction_sens.png", bbox_inches='tight', pad_inches=0.01)
 fig.savefig(PLOT_DIR + "fig16_latency_reduction_sens.pdf", bbox_inches='tight', pad_inches=0.01)

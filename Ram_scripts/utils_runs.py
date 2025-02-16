@@ -6,7 +6,7 @@ MITIGATION_LIST = ["PARA", "Graphene", "Hydra", "RFM", "PRAC"]
 
 NRH_VALUES = [1024, 512, 256, 128, 64, 32]
 
-MFR_DICT = {"Mfr. H" : [0.81, 0.64, 0.45, 0.36, 0.27], "Mfr. S" : [0.81, 0.64, 0.45, 0.36]}
+MFR_DICT = {"Mfr. H" : [0.81, 0.64, 0.45, 0.36, 0.27], "Mfr. S" : [0.81, 0.64, 0.45, 0.36], "Mfr. M" : [0.81, 0.64, 0.45, 0.36, 0.27, 0.18]}
 
 TRACE_PATH = f"{RAM_SRC}/cputraces/"
 trace_combination_filename = RAM_SRC + "/../mixes_singlecore.txt"

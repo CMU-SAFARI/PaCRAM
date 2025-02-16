@@ -35,7 +35,7 @@ for i, core in enumerate(["single", "multi"]):
     sns.lineplot(data=df, x="nRH", y="norm_ipc", hue="mitigation", style="config", ax=ax, markers=False, 
                     palette=colors, linewidth=1, alpha=1, err_style="band", errorbar=("ci", 100),
                     hue_order=["PARA", "RFM", "PRAC", "Hydra", "Graphene"],
-                    style_order=["Default", "PaCRAM-H", "PaCRAM-S"])
+                    style_order=["Default", "PaCRAM-H", "PaCRAM-M", "PaCRAM-S"])
 
     ax.invert_xaxis()
     ax.set_xscale('log', base=2)
@@ -50,9 +50,9 @@ for i, core in enumerate(["single", "multi"]):
     ax.axhline(y=1, color="black", linestyle="dashed", linewidth=1, zorder=0)
 
     handles, labels = ax.get_legend_handles_labels()
-    labels[-3:] = ["No PaCRAM", "PaCRAM-H", "PaCRAM-S"]
-    handles = handles[1:6] + handles[-3:]
-    labels = labels[1:6] + labels[-3:]
+    labels[-4:] = ["No PaCRAM", "PaCRAM-H", "PaCRAM-M", "PaCRAM-S"]
+    handles = handles[1:6] + handles[-4:]
+    labels = labels[1:6] + labels[-4:]
     for a in range(8):
         handles[a].set_linewidth(1.5)
         
@@ -73,10 +73,10 @@ for i, core in enumerate(["single", "multi"]):
     ax.text(0.03, 0.03, test_type, horizontalalignment='left', verticalalignment='bottom', transform=ax.transAxes, 
             fontsize=8.5, bbox=dict(facecolor='white', alpha=0.5, boxstyle='round,pad=0.1'))
     if i == 0:
-        ax.set_ylabel("System performance\n(normalized to no\nRowHammer mitigation)", fontsize=9, x=0, y=0.38, labelpad=2)
+        ax.set_ylabel("System performance\n(normalized to no\nRowHammer mitigation)", fontsize=9, x=0, y=0.37, labelpad=2)
 
 fig.legend(handles, labels, loc="center left", ncols=1, fancybox=True, fontsize=8.5,
-            borderpad=0.2, labelspacing=0.2, bbox_to_anchor=(0.9, 0.5), 
+            borderpad=0.2, labelspacing=0.2, bbox_to_anchor=(0.9, 0.42), 
             columnspacing=0.5, handletextpad=0.3, handlelength=1.5)
 
 plt.subplots_adjust(hspace=0.04, wspace=0.05)

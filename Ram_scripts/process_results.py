@@ -60,7 +60,9 @@ sc_df.loc[sc_df.config.str.contains("Mfr. S_0.45"), "config"] = "PaCRAM-S"
 sc_df = sc_df[~(sc_df.config.str.contains("Mfr. S"))]
 sc_df.loc[sc_df.config.str.contains("Mfr. H_0.36"), "config"] = "PaCRAM-H"
 sc_df = sc_df[~(sc_df.config.str.contains("Mfr. H"))]
-sc_df.loc[((sc_df.config != "PaCRAM-H") & (sc_df.config != "PaCRAM-S")), "config"] = "Default"
+sc_df.loc[sc_df.config.str.contains("Mfr. M_0.18"), "config"] = "PaCRAM-M"
+sc_df = sc_df[~(sc_df.config.str.contains("Mfr. M"))]
+sc_df.loc[((sc_df.config != "PaCRAM-H") & (sc_df.config != "PaCRAM-S") & (sc_df.config != "PaCRAM-M")), "config"] = "Default"
 
 t_df = sc_df[(sc_df.config == "PaCRAM-S") & ((sc_df.mitigation == "Hydra") | (sc_df.mitigation == "Graphene"))]
 sc_df = sc_df[~((sc_df.config == "PaCRAM-S") & ((sc_df.mitigation == "Hydra") | (sc_df.mitigation == "Graphene")))]
@@ -128,7 +130,9 @@ mc_df.loc[mc_df.config.str.contains("Mfr. S_0.45"), "config"] = "PaCRAM-S"
 mc_df = mc_df[~(mc_df.config.str.contains("Mfr. S"))]
 mc_df.loc[mc_df.config.str.contains("Mfr. H_0.36"), "config"] = "PaCRAM-H"
 mc_df = mc_df[~(mc_df.config.str.contains("Mfr. H"))]
-mc_df.loc[((mc_df.config != "PaCRAM-H") & (mc_df.config != "PaCRAM-S")), "config"] = "Default"
+mc_df.loc[mc_df.config.str.contains("Mfr. M_0.18"), "config"] = "PaCRAM-M"
+mc_df = mc_df[~(mc_df.config.str.contains("Mfr. M"))]
+mc_df.loc[((mc_df.config != "PaCRAM-H") & (mc_df.config != "PaCRAM-S") & (mc_df.config != "PaCRAM-M")), "config"] = "Default"
 
 t_df = mc_df[(mc_df.config == "PaCRAM-S") & ((mc_df.mitigation == "Hydra") | (mc_df.mitigation == "Graphene") | (mc_df.mitigation == "PARA"))]
 mc_df = mc_df[~((mc_df.config == "PaCRAM-S") & ((mc_df.mitigation == "Hydra") | (mc_df.mitigation == "Graphene") | (mc_df.mitigation == "PARA")))]

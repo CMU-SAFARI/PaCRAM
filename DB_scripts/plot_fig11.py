@@ -14,13 +14,13 @@ if not os.path.exists(plots_dir):
     os.makedirs(plots_dir)
     
 df = pd.read_csv(csv_dir + "/processed_RPCR.csv")
-df = df[df['mfr'] != "Mfr. M"]
+# df = df[df['mfr'] != "Mfr. M"]
 
 hhh = plt.plot([],marker="", ls="")[0]
 
-fig_width = 4
-fig_height = fig_width * 0.35
-fig, axarr = plt.subplots(1, 2, figsize=(fig_width, fig_height))
+fig_width = 5
+fig_height = fig_width * 0.32
+fig, axarr = plt.subplots(1, 3, figsize=(fig_width, fig_height))
 
 for i, (mfr, mfrdf) in enumerate(df.groupby("mfr")):
     ax = axarr.flatten()[i]
@@ -46,7 +46,7 @@ for i, (mfr, mfrdf) in enumerate(df.groupby("mfr")):
     ax.set_xlabel("")
     ax.set_ylabel("")
     if i ==0:
-        ax.set_ylabel("RowHammer threshold ($N_{RH}$)\nnormalized to $N_{RH}$ @ $t_{RAS(Nom)}$", fontsize=8, x=0, y=0.35, labelpad=2)
+        ax.set_ylabel("RowHammer threshold ($N_{RH}$)\nnormalized to $N_{RH}$ @ $t_{RAS(Nom)}$", fontsize=8, x=0, y=0.5, labelpad=2)
 
     ax.set_ylim(0, 1.2)
     ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2])
@@ -69,7 +69,7 @@ fig.legend(h, l, loc="lower center", frameon=True,
             handlelength=0.6, fontsize=7.8, title_fontsize=7.8,
             bbox_to_anchor=(0.505, 0.90),
             borderaxespad=0.15, handletextpad=0.15, columnspacing=0.3, ncols=6)
-fig.supxlabel("Charge restoration latency ($t_{RAS(Red)}$)\nnormalized to the nominal charge restoration latency ($t_{RAS(Nom)}$)", fontsize=8, x=0.5, y=-0.38)
+fig.supxlabel("Charge restoration latency ($t_{RAS(Red)}$)\nnormalized to the nominal charge restoration latency ($t_{RAS(Nom)}$)", fontsize=8, x=0.5, y=-0.3)
 
 plt.subplots_adjust(hspace=0.25, wspace=0.05)
 plt.savefig(plots_dir + "fig11_NRH_vs_RPCR.png", bbox_inches='tight', pad_inches=0.01)
